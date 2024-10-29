@@ -1,0 +1,58 @@
+#include <stdio.h>
+
+// Structure for process
+typedef struct Process {
+    int pid;
+    int arrivalTime;
+    int burstTime;
+    int waitingTime;
+    int turnaroundTime;
+} Process;
+
+// Function to implement FCFS scheduling
+void fcfsScheduling(Process processes[], int n) {
+    int currentTime = 0;
+    int totalWaitingTime = 0;
+    int totalTurnaroundTime = 0;
+
+    for (int i = 0; i < n; i++) {
+        if (processes[i].arrivalTime > currentTime) {
+            currentTime = processes[i].arrivalTime;
+        }
+
+        processes[i].waitingTime = currentTime - processes[i].arrivalTime;
+        processes[i].turnaroundTime = processes[i].burstTime + processes[i].waitingTime;
+        currentTime += processes[i].burstTime;
+
+        totalWaitingTime += processes[i].waitingTime;
+        totalTurnaroundTime += processes[i].turnaroundTime;
+    }
+
+    printf("Process\tArrival Time\tBurst Time\tWaiting Time\tTurnaround Time\n");
+    for (int i = 0; i < n; i++) {
+        printf("%d\t%d\t\t%d\t\t%d\t\t%d\n", processes[i].pid, processes[i].arrivalTime, processes[i].burstTime, processes[i].waitingTime, processes[i].turnaroundTime);
+    }
+
+    printf("Average Waiting Time: %.2f\n", (float)totalWaitingTime / n);
+    printf("Average Turnaround Time: %.2f\n", (float)totalTurnaroundTime / n);
+}
+
+int main() {
+    int n;
+    printf("Enter number of processes: ");
+    scanf("%d", &n);
+
+    Process processes[n];
+
+    for (int i = 0; i < n; i++) {
+        processes[i].pid = i + 1;
+        printf("Enter arrival time for process %d: ", i + 1);
+        scanf("%d", &processes[i].arrivalTime);
+        printf("Enter burst time for process %d: ", i + 1);
+        scanf("%d", &processes[i].burstTime);
+    }
+
+    fcfsScheduling(processes, n);
+
+    return 0;
+}
