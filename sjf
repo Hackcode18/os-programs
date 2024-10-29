@@ -1,0 +1,83 @@
+#include <stdio.h>
+
+// Structure for process
+typedef struct Process {
+    int pid;
+    int burstTime;
+    int waitingTime;
+    int turnaroundTime;
+} Process;
+
+// Function to find shortest job
+int shortestJob(Process processes[], int n, int currentTime) {
+    int minIndex = -1;
+    int minBurstTime = 1000;
+
+    for (int i = 0; i < n; i++) {
+        if (processes[i].burstTime < minBurstTime && processes[i].burstTime > 0) {
+            minIndex = i;
+            minBurstTime = processes[i].burstTime;
+        }
+    }
+
+    return minIndex;
+}
+
+// Function to implement SJF scheduling
+void sjfScheduling(Process processes[], int n) {
+    int currentTime = 0;
+    int totalWaitingTime = 0;
+    int totalTurnaroundTime = 0;
+
+    // Sort processes by arrival time (assuming arrival time = 0)
+    // If arrival times vary, sort accordingly
+
+    while (1) {
+        int shortestIndex = shortestJob(processes, n, currentTime);
+
+        if (shortestIndex == -1)
+            break;
+
+        // Calculate waiting time and turnaround time
+        processes[shortestIndex].waitingTime = currentTime;
+        processes[shortestIndex].turnaroundTime = currentTime + processes[shortestIndex].burstTime;
+        currentTime += processes[shortestIndex].burstTime;
+
+        // Update total waiting and turnaround times
+        totalWaitingTime += processes[shortestIndex].waitingTime;
+        totalTurnaroundTime += processes[shortestIndex].turnaroundTime;
+
+        // Mark process as completed
+        processes[shortestIndex].burstTime = 0;
+    }
+
+    // Calculate average waiting and turnaround times
+    float avgWaitingTime = (float)totalWaitingTime / n;
+    float avgTurnaroundTime = (float)totalTurnaroundTime / n;
+
+    printf("Process\tBurst Time\tWaiting Time\tTurnaround Time\n");
+    for (int i = 0; i < n; i++) {
+        printf("%d\t%d\t\t%d\t\t%d\n", processes[i].pid, processes[i].burstTime, processes[i].waitingTime, processes[i].turnaroundTime);
+    }
+
+    printf("Average Waiting Time: %.2f\n", avgWaitingTime);
+    printf("Average Turnaround Time: %.2f\n", avgTurnaroundTime);
+}
+
+int main() {
+    int n;
+    printf("Enter number of processes: ");
+    scanf("%d", &n);
+
+    Process processes[n];
+
+    for (int i = 0; i < n; i++) {
+        processes[i].pid = i + 1;
+        printf("Enter burst time for process %d: ", i + 1);
+        scanf("%d", &processes[i].burstTime);
+    }
+
+    sjfScheduling(processes, n);
+
+    return 0;
+}
