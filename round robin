@@ -1,0 +1,86 @@
+#include <stdio.h>
+
+// Structure for process
+typedef struct Process {
+    int pid;
+    int burstTime;
+    int remainingTime;
+    int waitingTime;
+    int turnaroundTime;
+} Process;
+
+// Function to implement Round Robin scheduling
+void roundRobinScheduling(Process processes[], int n, int quantum) {
+    int currentTime = 0;
+    int totalWaitingTime = 0;
+    int totalTurnaroundTime = 0;
+
+    while (1) {
+        int allCompleted = 1;
+
+        for (int i = 0; i < n; i++) {
+            if (processes[i].remainingTime > 0) {
+                allCompleted = 0;
+
+                if (processes[i].remainingTime <= quantum) {
+                    // Process completes in current quantum
+                    int timeTaken = processes[i].remainingTime;
+                    processes[i].remainingTime = 0;
+                    processes[i].turnaroundTime = currentTime + timeTaken;
+                    processes[i].waitingTime = processes[i].turnaroundTime - processes[i].burstTime;
+                    currentTime += timeTaken;
+                } else {
+                    // Process doesn't complete in current quantum
+                    processes[i].remainingTime -= quantum;
+                    currentTime += quantum;
+                }
+            }
+        }
+
+        if (allCompleted)
+            break;
+    }
+
+    // Calculate average waiting and turnaround times
+    float avgWaitingTime = 0.0;
+    float avgTurnaroundTime = 0.0;
+
+    for (int i = 0; i < n; i++) {
+        totalWaitingTime += processes[i].waitingTime;
+        totalTurnaroundTime += processes[i].turnaroundTime;
+    }
+
+    avgWaitingTime = (float)totalWaitingTime / n;
+    avgTurnaroundTime = (float)totalTurnaroundTime / n;
+
+    printf("Process\tPID\tBurst Time\tWaiting Time\tTurnaround Time\n");
+    for (int i = 0; i < n; i++) {
+        printf("%4d\t%d\t%d\t\t%d\t\t%d\n", i+1, processes[i].pid, processes[i].burstTime, processes[i].waitingTime, processes[i].turnaroundTime);
+    }
+
+    printf("Average Waiting Time: %.2f\n", avgWaitingTime);
+    printf("Average Turnaround Time: %.2f\n", avgTurnaroundTime);
+}
+
+int main() {
+    int n;
+    printf("Enter number of processes: ");
+    scanf("%d", &n);
+
+    Process processes[n];
+
+    for (int i = 0; i < n; i++) {
+        processes[i].pid = i + 1;
+        printf("Enter burst time for process %d: ", i + 1);
+        scanf("%d", &processes[i].burstTime);
+        processes[i].remainingTime = processes[i].burstTime;
+    }
+
+    int quantum;
+    printf("Enter time quantum: ");
+    scanf("%d", &quantum);
+
+    roundRobinScheduling(processes, n, quantum);
+
+    return 0;
+}
